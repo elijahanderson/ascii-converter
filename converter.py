@@ -37,7 +37,9 @@ def img_conv():
 
 # Live ASCII webcam
 def webcam():
+    detail = float(input('Enter level of detail (1.0 to 3.0, with 1.0 being the most detailed): ')) * 10
     camcap = cv.VideoCapture(0)
+
     while (cv.waitKey(1) & 0xFF) != ord('q'):
         ret, frame = camcap.read()
 
@@ -50,7 +52,7 @@ def webcam():
         ascii_img = np.empty([rows, cols], dtype='S1')
         for i in range(rows):
             for j in range(cols):
-                val = int(resized[i, j] // 26)
+                val = int(resized[i, j] // detail)
                 ascii_img[i, j] = ascii_vals[val]
 
         print('\n'.join((''.join(str(row, encoding='UTF-8')) for row in ascii_img)), end='')
