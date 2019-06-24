@@ -2,7 +2,7 @@
     Python program using OpenCV to convert a pixel image to an ASCII image.
     ~~ by Eli Anderson ~~
 """
-# TODO -- clean up code, let user decide detail in webcam
+
 import cv2 as cv
 import numpy as np
 import time
@@ -13,6 +13,23 @@ ascii_vals = [' ', '.', "'", '^', ',', ':', ';', '!', 'i', 'l', '<', '>', 'u', '
                   'X', 'Z', '#', '0', 'K', 'M', '@']
 
 
+# to convert pixels to ascii chars
+def ascii_convert(img, detail):
+    # resize to fit screen
+    resized = cv.resize(img, (200, 100))
+    rows, cols = resized.shape
+
+    ascii_img = np.empty([rows, cols], dtype='S1')
+    for i in range(rows):
+        for j in range(cols):
+            val = int(resized[i, j] // detail)
+            ascii_img[i, j] = ascii_vals[val]
+
+    print('\n'.join((''.join(str(row, encoding='UTF-8')) for row in ascii_img)), end='')
+    return ascii_img
+
+
+# for single image conversion
 def img_conv():
     strang = input('Enter file name: ')
     detail = float(input('Enter level of detail (1.0 to 3.0, with 1 being the most detailed): ')) * 10
@@ -21,21 +38,11 @@ def img_conv():
     # convert data to grayscale
     gray = cv.cvtColor(img, cv.COLOR_BAYER_BG2GRAY)
 
-    # resize to fit screen
-    resized = cv.resize(gray, (200, 100))
-    rows1, cols1 = resized.shape
-
     # assign an ASCII char for each pixel value
-    ascii_img = np.empty([rows1, cols1], dtype='S1')
-    for i in range(rows1):
-        for j in range(cols1):
-            val = int(resized[i, j] // detail)
-            ascii_img[i, j] = ascii_vals[val]
-
-    print('\n'.join((''.join(str(row, encoding='UTF-8')) for row in ascii_img)), end='')
+    ascii_convert(gray, detail)
 
 
-# Live ASCII webcam
+# live ASCII webcam
 def webcam():
     detail = float(input('Enter level of detail (1.0 to 3.0, with 1.0 being the most detailed): ')) * 10
     camcap = cv.VideoCapture(0)
@@ -45,18 +52,10 @@ def webcam():
 
         # convert to grayscale
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        # resize to fit screen
-        resized = cv.resize(gray, (200, 100))
-        rows, cols = resized.shape
 
-        ascii_img = np.empty([rows, cols], dtype='S1')
-        for i in range(rows):
-            for j in range(cols):
-                val = int(resized[i, j] // detail)
-                ascii_img[i, j] = ascii_vals[val]
+        ascii_convert(gray, detail)
 
-        print('\n'.join((''.join(str(row, encoding='UTF-8')) for row in ascii_img)), end='')
-        time.sleep(0.05)
+        time.sleep(0.05)  # 20 FPS
 
     # release the capture and destroy windows when done
     camcap.release()
